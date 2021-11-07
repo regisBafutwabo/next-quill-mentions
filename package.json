@@ -1,5 +1,5 @@
 {
-  "name": "codility",
+  "name": "next-quill-mentions",
   "private": true,
   "scripts": {
     "dev": "next dev",
