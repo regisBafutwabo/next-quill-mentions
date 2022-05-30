@@ -14,3 +14,28 @@ a {
 * {
   box-sizing: border-box;
 }
+
+.ql-mention-list{
+  background-color: white;
+}
+
+.ql-mention-list-container{
+  background-color: red;
+}
+
+.ql-mention-list-item{
+  color: black;
+}
+
+.ql-mention-list-item.selected{
+  background-color: #4566F6 !important;
+  color:white;
+}
+
+.mention {
+  color: #4566F6;
+}
+
+.ql-mention-list-item:hover {
+  background-color: blue;
+}

@@ -2,104 +2,122 @@ import 'quill-mention';
 import 'quill-emoji';
 
 import {
-  useCallback,
-  useMemo,
-  useState,
+    useMemo,
+    useState,
 } from 'react';
 
-import ReactQuill from 'react-quill';
+import QuillAutoDetectUrl from 'quill-auto-detect-url';
+import ReactQuill, { Quill } from 'react-quill';
 
-export default function Editor(){
+Quill.register("modules/autoDetectUrl", QuillAutoDetectUrl);
+
+export default function Editor() {
     const [value, setValue] = useState('');
+    const [delta, setDelta] = useState();
 
-    const atValues = useMemo(() =>([
-    { id: 1, value: "Fredrik Sundqvist", link: "https://www.google.com", target:'_blank' },
-    { id: 2, value: "Patrik Sjölin", link: "https://www.google.com", target:'_self' }
-    ]),[]);
+    // const [mentionned, setMentionned] = useState([])
 
-    const hashValues = useMemo(() =>([
-        { id: 3, value: "Fredrik Sundqvist 2", link: "www.google.com",target:'_self' },
-        { id: 4, value: "Patrik Sjölin 2", link: "https://www.google.com",target:'_self' }
-    ]),[]);
+    // const atValues = useMemo(() => ([
+    //     { id: 1, value: "Fredrik Sundqvist", link: "https://www.google.com" },
+    //     { id: 2, value: "Patrik Sjölin", link: "https://www.google.com" }
+    // ]), []);
 
-    const mentionLogic = useCallback((searchTerm, renderList, mentionChar) => {
-        let values;
+    // const hashValues = useMemo(() => ([
+    //     { id: 3, value: "Fredrik Sundqvist 2", link: "https://www.google.com" },
+    //     { id: 4, value: "Patrik Sjölin 2", link: "https://www.google.com" }
+    // ]), []);
 
-        if (mentionChar === "@") {
-        values = atValues;
-        } else {
-        values = hashValues;
-        }
+    // const mentionLogic = useCallback((searchTerm, renderList, mentionChar) => {
+    //     let values;
 
-        if (searchTerm.length === 0) {
-        renderList(values, searchTerm);
-        } else {
-        const matches = [];
-        for (let i = 0; i < values.length; i++)
-            if (
-            ~values[i].value.toLowerCase().indexOf(searchTerm.toLowerCase())
-            )
-            matches.push(values[i]);
-        renderList(matches, searchTerm);
-        }
-    },[atValues, hashValues]);
+    //     if (mentionChar === "@") {
+    //         values = atValues;
+    //     } else {
+    //         values = hashValues;
+    //     }
+
+    //     if (searchTerm.length === 0) {
+    //         renderList(values, searchTerm);
+    //     } else {
+    //         const matches = [];
+    //         for (let i = 0; i < values.length; i++)
+    //             if (
+    //                 ~values[i].value.toLowerCase().indexOf(searchTerm.toLowerCase())
+    //             )
+    //                 matches.push(values[i]);
+    //         renderList(matches, searchTerm);
+    //     }
+    // }, [atValues, hashValues]);
+
+    // const onMentionSelect = useCallback((item, insertItem) => {
+    //     if (mentionned.includes(item.id)) {
+    //         setMentionned(prev => ([...prev, item.id]))
+    //     }
+    //     insertItem(item);
+    // }, []);
 
     const modules = useMemo(() => ({
         toolbar: [
-        [{ 'header': [1, 2,false] }],
-        ['bold', 'italic', 'underline','strike' ],
-        [],
-        [],
-        ['link', 'image'],
-        [],
-        [],
-        ['code-block', 'blockquote'],
-        [{'list': 'ordered'}, {'list': 'bullet'}],
-        [],
-        [],
+            // [{ 'header': [1, 2, false] }],
+            ['bold'],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+            ['image', 'link'],
         ],
         "emoji-toolbar": false,
-        "emoji-textarea": true,
-        "emoji-shortname": true,
-        mention: {
-        allowedChars: /^[A-Za-z\sÅÄÖåäö]*$/,
-        mentionDenotationChars: ["@", "#"],
-        source: mentionLogic,
-        linkTarget: '_self',
-        // renderItem:(item, searchTerm) => {
-        //   return (<span>{`1 ${item.value} ${searchTerm.value}`}</span>)
+        "emoji-textarea": false,
+        "emoji-shortname": false,
+        autoDetectUrl: {
+            urlRegularExpression: /(https?:\/\/|www\.)[\w-.]+\.[\w-.]+[\S]+/i,
+        },
+        // mention: {
+        //     allowedChars: /^[A-Za-z\sÅÄÖåäö]*$/,
+        //     mentionDenotationChars: ["@", "#"],
+        //     source: mentionLogic,
+        //     linkTarget: '_blank',
+        //     onSelect: onMentionSelect,
+        //     // renderItem:(item, searchTerm) => {
+        //     //   return (<span>{`1 ${item.value} ${searchTerm.value}`}</span>)
+        //     // }
         // }
-    }}),[mentionLogic]);
+    }), []);
 
     const formats = useMemo(() => ([
         'header',
-        'bold', 'italic', 'underline', 'strike', 'blockquote',
-        'list', 'bullet', 'indent', 'code',
-        'link', 'image', 'mention', 'emoji'
-    ]),[]);
+        'bold',
+        'list', 'bullet',
+        'link', 'image'
+    ]), []);
 
-    const onChange=(content) => {
-        console.log("content", content);
+    const onChange = (content, delta, source, editor) => {
+
+        const contents = editor.getContents();
+        console.log("content", typeof content);
+        setDelta(JSON.stringify(editor.getContents()))
+        console.log('\n\n\ndelta', delta)
+        // setDelta(contents);
         setValue(content);
-    }
+    };
 
     return (
         <>
-        <ReactQuill 
-            value={value} 
-            onChange={onChange} 
-            modules={modules}
-            formats={formats} 
-            placeholder="Type your text here..."
-        />
-        <ReactQuill 
-            value={value} 
-            // onChange={onChange} 
-            modules={modules}
-            formats={formats}
-            theme="bubble" 
-            readOnly
-        />
+            <ReactQuill
+                value={value}
+                onChange={onChange}
+                modules={modules}
+                formats={formats}
+                // onFocus={() => setFocus(true)}
+                // theme={!value && notFocused ? "bubble" : "snow"}
+                placeholder="게시글 내용을 입력해주세요."
+            />
+            <div style={{ padding: 16 }}>Editor result view here:
+                <ReactQuill
+                    value={value}
+                    modules={{ ...modules }}
+                    formats={formats}
+                    theme="bubble"
+                    readOnly
+                />
+            </div>
         </>
     );
 }
